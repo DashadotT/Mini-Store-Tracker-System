@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Debt & Borrow Tracker</title>
+  <style>
+    :root {
+      --primary: #388e3c;
+      --accent: #66bb6a;
+      --bg: #f4f7f6;
+      --card: #ffffff;
+      --text: #333;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1.2em;
+      text-align: center;
+      font-size: 1.8em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 2em auto;
+      padding: 0 1em;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.5em;
+      margin-bottom: 2em;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    label {
+      display: block;
+      margin: 1em 0 0.3em;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      padding: 0.7em 1.4em;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 1em;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      font-size: 0.95em;
+    }
+
+    th, td {
+      padding: 0.8em;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: center;
+    }
+
+    th {
+      background: #f1f1f1;
+      font-weight: 600;
+    }
+
+    .action-btns {
+      display: flex;
+      justify-content: center;
+      gap: 0.5em;
+    }
+
+    .action-btns button {
+      font-size: 0.9em;
+      padding: 0.4em 0.8em;
+      border-radius: 6px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2em;
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      box-shadow: var(--shadow);
+      animation: slideIn 0.3s ease;
+    }
+
+    .close {
+      position: absolute;
+      top: 0.6em;
+      right: 1em;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .modal h2 {
+      margin-top: 0;
+    }
+
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1em;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0;} to {opacity: 1;}
+    }
+
+    @keyframes slideIn {
+      from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;}
+    }
+
+    @media (max-width: 600px) {
+      .flex-row {
+        flex-direction: column;
+        gap: 1em;
+      }
+      .action-btns {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>Debt & Borrow Tracker</header>
+
+<div class="container">
+  <!-- Register Form -->
+  <div class="card">
+    <h2>Register New Customer</h2>
+    <label for="name">Full Name</label>
+    <input type="text" id="name" placeholder="Juan Dela Cruz">
+
+    <label for="contact">Contact Number</label>
+    <input type="text" id="contact" placeholder="09XXXXXXXXX">
+
+    <button onclick="registerCustomer()">Register</button>
+  </div>
+
+  <!-- Accounts Table -->
+  <div class="card">
+    <h2>Registered Accounts</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Account ID</th>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="accountsTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Select Add Modal -->
+<div class="modal" id="selectModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('selectModal')">&times;</span>
+    <h2>Add Entry for <span id="addName"></span></h2>
+    <div class="flex-row">
+      <button onclick="showModal('debtModal')">➕ Debt</button>
+      <button onclick="showModal('borrowModal')">📦 Borrow</button>
+    </div>
+  </div>
+</div>
+
+<!-- Debt Modal -->
+<div class="modal" id="debtModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('debtModal')">&times;</span>
+    <h2>Debt Entry</h2>
+    <label>Item</label>
+    <input type="text" id="debtItem">
+    <label>Quantity</label>
+    <input type="number" id="debtQty" min="1">
+    <label>Price</label>
+    <input type="number" id="debtPrice" min="1">
+    <button onclick="addDebt()">Submit Debt</button>
+  </div>
+</div>
+
+<!-- Borrow Modal -->
+<div class="modal" id="borrowModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('borrowModal')">&times;</span>
+    <h2>Borrow Entry</h2>
+    <label>Item</label>
+    <select id="borrowItem">
+      <option>Coke</option>
+      <option>Sprite</option>
+      <option>Royal</option>
+    </select>
+    <label>Quantity</label>
+    <input type="number" id="borrowQty" min="1">
+    <button onclick="addBorrow()">Submit Borrow</button>
+  </div>
+</div>
+
+<!-- Records Modal -->
+<div class="modal" id="recordsModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('recordsModal')">&times;</span>
+    <h2>Records for <span id="recordName"></span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="recordsTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let customers = [], history = {}, currentAccount = null, idCount = 1;
+
+  function registerCustomer() {
+    const name = document.getElementById('name').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+    if (!name || !contact) return alert('Please fill in all fields.');
+    const id = 'C' + idCount++;
+    customers.push({ id, name, contact });
+    history[id] = [];
+    renderAccounts();
+    document.getElementById('name').value = '';
+    document.getElementById('contact').value = '';
+  }
+
+  function renderAccounts() {
+    const table = document.getElementById('accountsTable');
+    table.innerHTML = '';
+    customers.forEach(c => {
+      table.innerHTML += `
+        <tr>
+          <td>${c.id}</td>
+          <td>${c.name}</td>
+          <td>${c.contact}</td>
+          <td class="action-btns">
+            <button onclick="openSelectModal('${c.id}')">Add</button>
+            <button onclick="openRecordsModal('${c.id}')">Records</button>
+          </td>
+        </tr>`;
+    });
+  }
+
+  function openSelectModal(id) {
+    currentAccount = id;
+    document.getElementById('addName').innerText = customers.find(c => c.id === id).name;
+    showModal('selectModal');
+  }
+
+  function openRecordsModal(id) {
+    currentAccount = id;
+    const customer = customers.find(c => c.id === id);
+    document.getElementById('recordName').innerText = customer.name;
+    const tbody = document.getElementById('recordsTable');
+    tbody.innerHTML = '';
+    history[id].forEach(e => {
+      const total = e.price ? (e.qty * e.price).toFixed(2) : '-';
+      tbody.innerHTML += `
+        <tr>
+          <td>${e.date}</td>
+          <td>${e.type}</td>
+          <td>${e.item}</td>
+          <td>${e.qty}</td>
+          <td>${e.price ? e.price.toFixed(2) : '-'}</td>
+          <td>${total}</td>
+        </tr>`;
+    });
+    showModal('recordsModal');
+  }
+
+  function addDebt() {
+    const item = document.getElementById('debtItem').value.trim();
+    const qty = parseInt(document.getElementById('debtQty').value);
+    const price = parseFloat(document.getElementById('debtPrice').value);
+    if (!item || !qty || !price) return alert('Fill all debt fields');
+    history[currentAccount].push({ type: 'Debt', item, qty, price, date: new Date().toLocaleDateString() });
+    closeModal('debtModal');
+  }
+
+  function addBorrow() {
+    const item = document.getElementById('borrowItem').value;
+    const qty = parseInt(document.getElementById('borrowQty').value);
+    if (!item || !qty) return alert('Fill all borrow fields');
+    history[currentAccount].push({ type: 'Borrow', item, qty, price: null, date: new Date().toLocaleDateString() });
+    closeModal('borrowModal');
+  }
+
+  function showModal(id) {
+    closeAllModals();
+    document.getElementById(id).style.display = 'flex';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+  }
+</script>
+
+</body>
+</html>
