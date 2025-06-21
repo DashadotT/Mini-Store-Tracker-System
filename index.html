@@ -282,11 +282,11 @@
                 <span class="close" onclick="closeModal('debtModal')">&times;</span>
                 <h2>Debt Entry</h2>
                 <label>Item</label>
-                <input type="text" id="debtItem">
+                <input type="text" id="debtItem" required>
                 <label>Quantity</label>
-                <input type="number" id="debtQty" min="1">
+                <input type="number" id="debtQty" min="1" required>
                 <label>Price</label>
-                <input type="number" id="debtPrice" min="1">
+                <input type="number" id="debtPrice" min="1" required>
                 <button onclick="addDebt()">Submit Debt</button>
             </form>
         </div>
@@ -294,17 +294,19 @@
     <!-- Borrow Modal -->
     <div class="modal" id="borrowModal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('borrowModal')">&times;</span>
-            <h2>Borrow Entry</h2>
-            <label>Item</label>
-            <select id="borrowItem">
-                <option>Coke</option>
-                <option>Sprite</option>
-                <option>Royal</option>
-            </select>
-            <label>Quantity</label>
-            <input type="number" id="borrowQty" min="1">
-            <button onclick="addBorrow()">Submit Borrow</button>
+            <form>
+                <span class="close" onclick="closeModal('borrowModal')">&times;</span>
+                <h2>Borrow Entry</h2>
+                <label>Item</label>
+                <select id="borrowItem">
+                    <option>Coke</option>
+                    <option>Sprite</option>
+                    <option>Royal</option>
+                </select>
+                <label>Quantity</label>
+                <input type="number" id="borrowQty" min="1" required>
+                <button onclick="addBorrow()">Submit Borrow</button>
+            </form>
         </div>
     </div>
 
@@ -428,7 +430,7 @@
             const qty = parseInt(qtyInput.value);
             const price = parseFloat(priceInput.value);
 
-            if (!item || !qty || !price) return alert('Fill all debt fields');
+            if (!item || !qty || !price) return addDebt();
 
             history[currentAccount].push({
                 type: 'Debt',
@@ -454,7 +456,7 @@
             const item = itemSelect.value;
             const qty = parseInt(qtyInput.value);
 
-            if (!item || !qty) return alert('Fill all borrow fields');
+            if (!item || !qty) return addBorrow();
 
             history[currentAccount].push({
                 type: 'Borrow',
