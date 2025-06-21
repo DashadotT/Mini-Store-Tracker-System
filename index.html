@@ -340,6 +340,18 @@
         </div>
     </div>
 
+    <!-- Return Modal -->
+    <div class="modal" id="returnModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('returnModal')">&times;</span>
+            <h2>Confirm Return</h2>
+            <p>Please type <strong>"nene"</strong> to confirm this bottle is returned:</p>
+            <input type="text" id="confirmReturnInput" placeholder="Type here..." />
+            <button onclick="confirmReturn()">Confirm Return</button>
+        </div>
+    </div>
+
+
 
     <script>
         let customers = [], history = {}, currentAccount = null, idCount = 1;
@@ -404,16 +416,22 @@
                 if (type === 'Debt' && e.price) {
                     totalDebt += e.qty * e.price;
                 }
+
                 tbody.innerHTML += `
-      <tr>
-        <td>${e.date}</td>
-        <td>${e.type}</td>
-        <td>${e.item}</td>
-        <td>${e.qty}</td>
-        <td>${e.price ? e.price.toFixed(2) : '-'}</td>
-        <td>${total}</td>
-      </tr>`;
-            });
+                <tr>
+                    <td>${e.date}</td>
+                    <td>${e.type}</td>
+                    <td>${e.item}</td>
+                    <td>${e.qty}</td>
+                    <td>${e.price ? e.price.toFixed(2) : '-'}</td>
+                    <td>
+                        ${type === 'Debt' ? `₱${total}` :
+                        e.returned ? '✔ Returned' :
+                            `<button onclick="openReturnModal('${e.item}', ${e.qty})">Mark as Returned</button>`}
+                    </td>
+                </tr>`;
+            }); 
+
 
             totalDebtDisplay.textContent = (type === 'Debt')
                 ? `Total Amount to Pay: ₱${totalDebt.toFixed(2)}`
@@ -486,6 +504,32 @@
         function closeAllModals() {
             document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         }
+
+        let returnItem = null, returnQty = 0;
+
+        function openReturnModal(item, qty) {
+            returnItem = item;
+            returnQty = qty;
+            document.getElementById('confirmReturnInput').value = '';
+            showModal('returnModal');
+        }
+
+        function confirmReturn() {
+            const input = document.getElementById('confirmReturnInput').value.trim().toLowerCase();
+            if (input === 'nene') {
+                const entries = history[currentAccount];
+                const entry = entries.find(e => e.type === 'Borrow' && e.item === returnItem && e.qty === returnQty && !e.returned);
+                if (entry) {
+                    entry.returned = true;
+                    closeModal('returnModal');
+                    filterRecords('Borrow');
+                    alert('Marked as returned.');
+                }
+            } else {
+                alert('Incorrect confirmation. Please type "nene" exactly.');
+            }
+        }
+
     </script>
 
 </body>
